@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+backend/venv/
+
+# Variáveis de ambiente
+.env
+backend/.env
+
+# VS Code
+.vscode/
+
+# Pytest
+.pytest_cache/
+
+# Banco local
+*.db
+
+# Angular
+frontend/node_modules/
+frontend/dist/
+
+# Sistema
+.DS_Store
+Thumbs.db
