@@ -21,6 +21,12 @@ from app.schemas.ticket import (
 
 from app.schemas.ticket import TicketCreate, TicketResponse
 
+from app.repositories.comment_repository import (
+    create_comment,
+    list_comments,
+)
+from app.schemas.comment import CommentCreate, CommentResponse
+
 
 router = APIRouter(
     prefix="/tickets",
@@ -191,4 +197,65 @@ def change_ticket_status(
         db=db,
         ticket=ticket,
         new_status=status_data.status,
+    )
+
+@router.post(
+    "/{ticket_id}/comments",
+    response_model=CommentResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def add_comment(
+    ticket_id: int,
+    comment_data: CommentCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> CommentResponse:
+    ticket = get_ticket_by_id(db=db, ticket_id=ticket_id)
+
+    if ticket is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Chamado não encontrado.",
+        )
+
+    if not user_can_access_ticket(current_user, ticket):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Você não possui permissão para comentar neste chamado.",
+        )
+
+    return create_comment(
+        db=db,
+        ticket_id=ticket_id,
+        author_id=current_user.id,
+        content=comment_data.content,
+    )
+
+
+@router.get(
+    "/{ticket_id}/comments",
+    response_model=list[CommentResponse],
+)
+def get_comments(
+    ticket_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> list[CommentResponse]:
+    ticket = get_ticket_by_id(db=db, ticket_id=ticket_id)
+
+    if ticket is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Chamado não encontrado.",
+        )
+
+    if not user_can_access_ticket(current_user, ticket):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Você não possui permissão para visualizar os comentários.",
+        )
+
+    return list_comments(
+        db=db,
+        ticket_id=ticket_id,
     )
