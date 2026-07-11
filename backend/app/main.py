@@ -1,4 +1,7 @@
 from fastapi import FastAPI
+from sqlalchemy import text
+
+from app.database.connection import engine
 
 app = FastAPI(
     title="FlowDesk API",
@@ -12,4 +15,15 @@ def health_check() -> dict[str, str]:
     return {
         "status": "online",
         "service": "FlowDesk API",
+    }
+
+
+@app.get("/health/database", tags=["Health"])
+def database_health_check() -> dict[str, str]:
+    with engine.connect() as connection:
+        connection.execute(text("SELECT 1"))
+
+    return {
+        "status": "online",
+        "database": "PostgreSQL",
     }
