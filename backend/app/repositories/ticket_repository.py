@@ -1,7 +1,8 @@
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app.models.ticket import Ticket, TicketPriority, TicketStatus
+from app.models.user import User, UserRole
 from app.schemas.ticket import TicketCreate
 
 
@@ -26,10 +27,24 @@ def create_ticket(
 
 def list_tickets(
     db: Session,
+    current_user: User,
     status: TicketStatus | None = None,
     priority: TicketPriority | None = None,
 ) -> list[Ticket]:
     statement = select(Ticket)
+
+    if current_user.role == UserRole.REQUESTER:
+        statement = statement.where(
+            Ticket.requester_id == current_user.id
+        )
+
+    elif current_user.role == UserRole.TECHNICIAN:
+        statement = statement.where(
+            or_(
+                Ticket.technician_id == current_user.id,
+                Ticket.technician_id.is_(None),
+            )
+        )
 
     if status is not None:
         statement = statement.where(Ticket.status == status)
@@ -40,3 +55,10 @@ def list_tickets(
     statement = statement.order_by(Ticket.created_at.desc())
 
     return list(db.scalars(statement).all())
+
+
+def get_ticket_by_id(
+    db: Session,
+    ticket_id: int,
+) -> Ticket | None:
+    return db.get(Ticket, ticket_id)
