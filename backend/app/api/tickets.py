@@ -5,6 +5,14 @@ from app.api.dependencies import get_current_user
 from app.database.connection import get_db
 from app.models.ticket import Ticket, TicketPriority, TicketStatus
 from app.models.user import User, UserRole
+from app.repositories.comment_repository import (
+    create_comment,
+    list_comments,
+)
+from app.repositories.ticket_history_repository import (
+    create_ticket_history,
+    list_ticket_history,
+)
 from app.repositories.ticket_repository import (
     assign_ticket_to_technician,
     create_ticket,
@@ -12,20 +20,13 @@ from app.repositories.ticket_repository import (
     list_tickets,
     update_ticket_status,
 )
-
+from app.schemas.comment import CommentCreate, CommentResponse
 from app.schemas.ticket import (
     TicketCreate,
     TicketResponse,
     TicketStatusUpdate,
 )
-
-from app.schemas.ticket import TicketCreate, TicketResponse
-
-from app.repositories.comment_repository import (
-    create_comment,
-    list_comments,
-)
-from app.schemas.comment import CommentCreate, CommentResponse
+from app.schemas.ticket_history import TicketHistoryResponse
 
 
 router = APIRouter(
@@ -63,11 +64,21 @@ def open_ticket(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> TicketResponse:
-    return create_ticket(
+    ticket = create_ticket(
         db=db,
         ticket_data=ticket_data,
         requester_id=current_user.id,
     )
+
+    create_ticket_history(
+        db=db,
+        ticket_id=ticket.id,
+        user_id=current_user.id,
+        action="TICKET_CREATED",
+        new_value=ticket.status.value,
+    )
+
+    return ticket
 
 
 @router.get(
@@ -116,6 +127,7 @@ def get_ticket(
 
     return ticket
 
+
 @router.patch(
     "/{ticket_id}/assign-to-me",
     response_model=TicketResponse,
@@ -151,11 +163,29 @@ def assign_ticket_to_me(
             detail="Este chamado já foi atribuído a outro técnico.",
         )
 
-    return assign_ticket_to_technician(
+    old_technician_id = ticket.technician_id
+
+    updated_ticket = assign_ticket_to_technician(
         db=db,
         ticket=ticket,
         technician_id=current_user.id,
     )
+
+    create_ticket_history(
+        db=db,
+        ticket_id=ticket.id,
+        user_id=current_user.id,
+        action="TICKET_ASSIGNED",
+        old_value=(
+            str(old_technician_id)
+            if old_technician_id is not None
+            else None
+        ),
+        new_value=str(current_user.id),
+    )
+
+    return updated_ticket
+
 
 @router.patch(
     "/{ticket_id}/status",
@@ -193,11 +223,25 @@ def change_ticket_status(
             detail="Você não é o técnico responsável por este chamado.",
         )
 
-    return update_ticket_status(
+    old_status = ticket.status.value
+
+    updated_ticket = update_ticket_status(
         db=db,
         ticket=ticket,
         new_status=status_data.status,
     )
+
+    create_ticket_history(
+        db=db,
+        ticket_id=ticket.id,
+        user_id=current_user.id,
+        action="STATUS_CHANGED",
+        old_value=old_status,
+        new_value=status_data.status.value,
+    )
+
+    return updated_ticket
+
 
 @router.post(
     "/{ticket_id}/comments",
@@ -210,7 +254,10 @@ def add_comment(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> CommentResponse:
-    ticket = get_ticket_by_id(db=db, ticket_id=ticket_id)
+    ticket = get_ticket_by_id(
+        db=db,
+        ticket_id=ticket_id,
+    )
 
     if ticket is None:
         raise HTTPException(
@@ -224,12 +271,22 @@ def add_comment(
             detail="Você não possui permissão para comentar neste chamado.",
         )
 
-    return create_comment(
+    comment = create_comment(
         db=db,
         ticket_id=ticket_id,
         author_id=current_user.id,
         content=comment_data.content,
     )
+
+    create_ticket_history(
+        db=db,
+        ticket_id=ticket_id,
+        user_id=current_user.id,
+        action="COMMENT_ADDED",
+        new_value=str(comment.id),
+    )
+
+    return comment
 
 
 @router.get(
@@ -241,7 +298,10 @@ def get_comments(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> list[CommentResponse]:
-    ticket = get_ticket_by_id(db=db, ticket_id=ticket_id)
+    ticket = get_ticket_by_id(
+        db=db,
+        ticket_id=ticket_id,
+    )
 
     if ticket is None:
         raise HTTPException(
@@ -256,6 +316,38 @@ def get_comments(
         )
 
     return list_comments(
+        db=db,
+        ticket_id=ticket_id,
+    )
+
+
+@router.get(
+    "/{ticket_id}/history",
+    response_model=list[TicketHistoryResponse],
+)
+def get_ticket_history(
+    ticket_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> list[TicketHistoryResponse]:
+    ticket = get_ticket_by_id(
+        db=db,
+        ticket_id=ticket_id,
+    )
+
+    if ticket is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Chamado não encontrado.",
+        )
+
+    if not user_can_access_ticket(current_user, ticket):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Você não possui permissão para visualizar o histórico.",
+        )
+
+    return list_ticket_history(
         db=db,
         ticket_id=ticket_id,
     )
