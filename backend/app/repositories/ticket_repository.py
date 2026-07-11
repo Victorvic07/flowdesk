@@ -10,11 +10,13 @@ def create_ticket(
     db: Session,
     ticket_data: TicketCreate,
     requester_id: int,
+    
 ) -> Ticket:
     ticket = Ticket(
         title=ticket_data.title,
         description=ticket_data.description,
         priority=ticket_data.priority,
+        category_id=ticket_data.category_id,
         requester_id=requester_id,
     )
 

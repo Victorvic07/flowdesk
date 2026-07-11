@@ -9,6 +9,7 @@ class TicketCreate(BaseModel):
     title: str = Field(min_length=3, max_length=150)
     description: str = Field(min_length=10)
     priority: TicketPriority = TicketPriority.MEDIUM
+    category_id: int
 
 
 class TicketResponse(BaseModel):
@@ -21,6 +22,7 @@ class TicketResponse(BaseModel):
     technician_id: int | None
     created_at: datetime
     updated_at: datetime
+    category_id: int | None
 
     model_config = ConfigDict(from_attributes=True)
 

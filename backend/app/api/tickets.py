@@ -5,6 +5,7 @@ from app.api.dependencies import get_current_user
 from app.database.connection import get_db
 from app.models.ticket import Ticket, TicketPriority, TicketStatus
 from app.models.user import User, UserRole
+from app.repositories.category_repository import get_category_by_id
 from app.repositories.comment_repository import (
     create_comment,
     list_comments,
@@ -64,6 +65,17 @@ def open_ticket(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> TicketResponse:
+    category = get_category_by_id(
+        db=db,
+        category_id=ticket_data.category_id,
+    )
+
+    if category is None or not category.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Categoria não encontrada ou inativa.",
+        )
+
     ticket = create_ticket(
         db=db,
         ticket_data=ticket_data,
