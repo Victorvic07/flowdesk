@@ -62,3 +62,28 @@ def get_ticket_by_id(
     ticket_id: int,
 ) -> Ticket | None:
     return db.get(Ticket, ticket_id)
+
+def assign_ticket_to_technician(
+    db: Session,
+    ticket: Ticket,
+    technician_id: int,
+) -> Ticket:
+    ticket.technician_id = technician_id
+    ticket.status = TicketStatus.IN_PROGRESS
+
+    db.commit()
+    db.refresh(ticket)
+
+    return ticket
+
+def update_ticket_status(
+    db: Session,
+    ticket: Ticket,
+    new_status: TicketStatus,
+) -> Ticket:
+    ticket.status = new_status
+
+    db.commit()
+    db.refresh(ticket)
+
+    return ticket

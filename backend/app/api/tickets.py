@@ -6,10 +6,19 @@ from app.database.connection import get_db
 from app.models.ticket import Ticket, TicketPriority, TicketStatus
 from app.models.user import User, UserRole
 from app.repositories.ticket_repository import (
+    assign_ticket_to_technician,
     create_ticket,
     get_ticket_by_id,
     list_tickets,
+    update_ticket_status,
 )
+
+from app.schemas.ticket import (
+    TicketCreate,
+    TicketResponse,
+    TicketStatusUpdate,
+)
+
 from app.schemas.ticket import TicketCreate, TicketResponse
 
 
@@ -100,3 +109,86 @@ def get_ticket(
         )
 
     return ticket
+
+@router.patch(
+    "/{ticket_id}/assign-to-me",
+    response_model=TicketResponse,
+)
+def assign_ticket_to_me(
+    ticket_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> TicketResponse:
+    if current_user.role != UserRole.TECHNICIAN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Somente técnicos podem assumir chamados.",
+        )
+
+    ticket = get_ticket_by_id(
+        db=db,
+        ticket_id=ticket_id,
+    )
+
+    if ticket is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Chamado não encontrado.",
+        )
+
+    if (
+        ticket.technician_id is not None
+        and ticket.technician_id != current_user.id
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Este chamado já foi atribuído a outro técnico.",
+        )
+
+    return assign_ticket_to_technician(
+        db=db,
+        ticket=ticket,
+        technician_id=current_user.id,
+    )
+
+@router.patch(
+    "/{ticket_id}/status",
+    response_model=TicketResponse,
+)
+def change_ticket_status(
+    ticket_id: int,
+    status_data: TicketStatusUpdate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> TicketResponse:
+    ticket = get_ticket_by_id(
+        db=db,
+        ticket_id=ticket_id,
+    )
+
+    if ticket is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Chamado não encontrado.",
+        )
+
+    if current_user.role == UserRole.REQUESTER:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Solicitantes não podem alterar o status do chamado.",
+        )
+
+    if (
+        current_user.role == UserRole.TECHNICIAN
+        and ticket.technician_id != current_user.id
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Você não é o técnico responsável por este chamado.",
+        )
+
+    return update_ticket_status(
+        db=db,
+        ticket=ticket,
+        new_status=status_data.status,
+    )
