@@ -53,6 +53,11 @@ class Ticket(Base):
         nullable=False,
     )
 
+    category_id: Mapped[int | None] = mapped_column(
+        ForeignKey("categories.id"),
+        nullable=True,
+    )
+
     requester_id: Mapped[int] = mapped_column(
         ForeignKey("users.id"),
         nullable=False,
@@ -74,6 +79,11 @@ class Ticket(Base):
         default=datetime.utcnow,
         onupdate=datetime.utcnow,
         nullable=False,
+    )
+
+    category = relationship(
+        "Category",
+        foreign_keys=[category_id],
     )
 
     requester = relationship(
