@@ -1,0 +1,82 @@
+<div class="page">
+  <header>
+    <div>
+      <h1>Chamados</h1>
+      <p>Consulte e acompanhe todos os atendimentos.</p>
+    </div>
+
+    <div class="header-actions">
+      <a routerLink="/dashboard">Visão geral</a>
+      <a routerLink="/new-ticket" class="primary">Novo chamado</a>
+    </div>
+  </header>
+
+  <section class="filters">
+    <div>
+      <label for="status">Status</label>
+
+      <select
+        id="status"
+        [(ngModel)]="statusFilter"
+        (change)="applyFilters()"
+      >
+        <option value="">Todos</option>
+        <option value="OPEN">Aberto</option>
+        <option value="IN_PROGRESS">Em atendimento</option>
+        <option value="WAITING_USER">Aguardando usuário</option>
+        <option value="RESOLVED">Resolvido</option>
+        <option value="CLOSED">Fechado</option>
+      </select>
+    </div>
+
+    <div>
+      <label for="priority">Prioridade</label>
+
+      <select
+        id="priority"
+        [(ngModel)]="priorityFilter"
+        (change)="applyFilters()"
+      >
+        <option value="">Todas</option>
+        <option value="LOW">Baixa</option>
+        <option value="MEDIUM">Média</option>
+        <option value="HIGH">Alta</option>
+        <option value="CRITICAL">Crítica</option>
+      </select>
+    </div>
+
+    <button type="button" (click)="clearFilters()">
+      Limpar filtros
+    </button>
+  </section>
+
+  <section class="content">
+    @if (loading) {
+      <div class="state">Carregando chamados...</div>
+    } @else if (errorMessage) {
+      <div class="state error">{{ errorMessage }}</div>
+    } @else if (filteredTickets.length === 0) {
+      <div class="state">Nenhum chamado encontrado.</div>
+    } @else {
+      <div class="ticket-list">
+        @for (ticket of filteredTickets; track ticket.id) {
+          <article class="ticket-card">
+            <div class="ticket-main">
+              <span class="ticket-id">#{{ ticket.id }}</span>
+              <h2>{{ ticket.title }}</h2>
+              <p>{{ ticket.description }}</p>
+            </div>
+
+            <div class="ticket-info">
+              <span>{{ ticket.status }}</span>
+              <strong>{{ ticket.priority }}</strong>
+              <small>
+                {{ ticket.created_at | date: 'dd/MM/yyyy HH:mm' }}
+              </small>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </section>
+</div>
