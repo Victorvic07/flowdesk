@@ -8,10 +8,6 @@
       <h1>Detalhes do chamado</h1>
       <p>Visualize e gerencie as informações do atendimento.</p>
     </div>
-
-    <a routerLink="/dashboard" class="dashboard-link">
-      Visão geral
-    </a>
   </header>
 
   @if (loading) {
@@ -76,18 +72,33 @@
         </div>
       </div>
 
-      <button
-        type="button"
-        class="assign-button"
-        (click)="assignToMe()"
-        [disabled]="assigning"
-      >
-        @if (assigning) {
-          Atribuindo...
-        } @else {
-          Atribuir para mim
-        }
-      </button>
+      <div class="right-actions">
+        <button
+          type="button"
+          class="assign-button"
+          (click)="assignToMe()"
+          [disabled]="assigning"
+        >
+          @if (assigning) {
+            Atribuindo...
+          } @else {
+            Atribuir para mim
+          }
+        </button>
+
+        <button
+          type="button"
+          class="delete-ticket-button"
+          (click)="deleteTicket()"
+          [disabled]="deletingTicket"
+        >
+          @if (deletingTicket) {
+            Excluindo...
+          } @else {
+            Excluir chamado
+          }
+        </button>
+      </div>
     </section>
 
     @if (actionMessage) {

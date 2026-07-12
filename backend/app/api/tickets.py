@@ -3,7 +3,9 @@ from sqlalchemy.orm import Session
 
 from app.api.dependencies import get_current_user
 from app.database.connection import get_db
+from app.models.comment import Comment
 from app.models.ticket import Ticket, TicketPriority, TicketStatus
+from app.models.ticket_history import TicketHistory
 from app.models.user import User, UserRole
 from app.repositories.category_repository import get_category_by_id
 from app.repositories.comment_repository import (
@@ -140,6 +142,53 @@ def get_ticket(
     return ticket
 
 
+@router.delete(
+    "/{ticket_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+)
+def delete_ticket(
+    ticket_id: int,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> None:
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Apenas administradores podem excluir chamados.",
+        )
+
+    ticket = get_ticket_by_id(
+        db=db,
+        ticket_id=ticket_id,
+    )
+
+    if ticket is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Chamado não encontrado.",
+        )
+
+    try:
+        db.query(Comment).filter(
+            Comment.ticket_id == ticket_id,
+        ).delete(synchronize_session=False)
+
+        db.query(TicketHistory).filter(
+            TicketHistory.ticket_id == ticket_id,
+        ).delete(synchronize_session=False)
+
+        db.delete(ticket)
+        db.commit()
+
+    except Exception as error:
+        db.rollback()
+
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Não foi possível excluir o chamado.",
+        ) from error
+
+
 @router.patch(
     "/{ticket_id}/assign-to-me",
     response_model=TicketResponse,
@@ -151,12 +200,15 @@ def assign_ticket_to_me(
 ) -> TicketResponse:
     if current_user.role not in {
         UserRole.TECHNICIAN,
-         UserRole.ADMIN,
-     }:
-         raise HTTPException(
-        status_code=403,
-        detail="Apenas técnicos ou administradores podem assumir chamados.",
-    )
+        UserRole.ADMIN,
+    }:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=(
+                "Apenas técnicos ou administradores "
+                "podem assumir chamados."
+            ),
+        )
 
     ticket = get_ticket_by_id(
         db=db,

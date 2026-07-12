@@ -367,3 +367,37 @@ header {
     width: 100%;
   }
 }
+
+.right-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.delete-ticket-button {
+  height: 44px;
+  padding: 0 18px;
+  border: 1px solid #fecaca;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #dc2626;
+  cursor: pointer;
+  font-weight: 700;
+
+  &:hover:not(:disabled) {
+    border-color: #fca5a5;
+    background: #fef2f2;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+@media (max-width: 900px) {
+  .right-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
