@@ -1,0 +1,148 @@
+<div class="page">
+  <header>
+    <div>
+      <h1>Usuários</h1>
+      <p>Cadastre e consulte os usuários do sistema.</p>
+    </div>
+
+    <div class="header-actions">
+      <a routerLink="/dashboard">Visão geral</a>
+      <a routerLink="/tickets">Chamados</a>
+    </div>
+  </header>
+
+  <section class="layout">
+    <article class="form-card">
+      <h2>Novo usuário</h2>
+      <p>Cadastre um usuário e defina o perfil de acesso.</p>
+
+      <form (ngSubmit)="createUser()">
+        <div class="field">
+          <label for="name">Nome</label>
+
+          <input
+            id="name"
+            name="name"
+            type="text"
+            [(ngModel)]="name"
+            placeholder="Nome completo"
+          />
+        </div>
+
+        <div class="field">
+          <label for="email">E-mail</label>
+
+          <input
+            id="email"
+            name="email"
+            type="email"
+            [(ngModel)]="email"
+            placeholder="usuario@empresa.com"
+          />
+        </div>
+
+        <div class="field">
+          <label for="password">Senha</label>
+
+          <input
+            id="password"
+            name="password"
+            type="password"
+            [(ngModel)]="password"
+            placeholder="Senha de acesso"
+          />
+        </div>
+
+        <div class="field">
+          <label for="role">Perfil</label>
+
+          <select
+            id="role"
+            name="role"
+            [(ngModel)]="role"
+          >
+            <option value="REQUESTER">Solicitante</option>
+            <option value="TECHNICIAN">Técnico</option>
+            <option value="ADMIN">Administrador</option>
+          </select>
+        </div>
+
+        @if (errorMessage) {
+          <div class="message error">
+            {{ errorMessage }}
+          </div>
+        }
+
+        @if (successMessage) {
+          <div class="message success">
+            {{ successMessage }}
+          </div>
+        }
+
+        <button
+          type="submit"
+          [disabled]="saving"
+        >
+          @if (saving) {
+            Cadastrando...
+          } @else {
+            Cadastrar usuário
+          }
+        </button>
+      </form>
+    </article>
+
+    <article class="list-card">
+      <div class="section-title">
+        <div>
+          <h2>Usuários cadastrados</h2>
+          <p>{{ users.length }} usuário(s) encontrado(s).</p>
+        </div>
+      </div>
+
+      @if (loading) {
+        <div class="state">
+          Carregando usuários...
+        </div>
+      } @else if (errorMessage && users.length === 0) {
+        <div class="state error">
+          {{ errorMessage }}
+        </div>
+      } @else if (users.length === 0) {
+        <div class="state">
+          Nenhum usuário cadastrado.
+        </div>
+      } @else {
+        <div class="user-list">
+          @for (user of users; track user.id) {
+            <div class="user-item">
+              <div class="user-main">
+                <span class="user-id">#{{ user.id }}</span>
+                <h3>{{ user.name }}</h3>
+                <p>{{ user.email }}</p>
+
+                <small>
+                  Criado em
+                  {{ user.created_at | date: 'dd/MM/yyyy HH:mm' }}
+                </small>
+              </div>
+
+              <div class="user-status">
+                <span class="role">
+                  {{ user.role }}
+                </span>
+
+                <span
+                  class="status"
+                  [class.inactive]="!user.is_active"
+                >
+                  {{ user.is_active ? 'Ativo' : 'Inativo' }}
+                </span>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </article>
+  </section>
+</div>

@@ -6,6 +6,7 @@ import { Tickets } from './pages/tickets/tickets';
 import { TicketDetails } from './pages/ticket-details/ticket-details';
 import { NewTicket } from './pages/new-ticket/new-ticket';
 import { Categories } from './pages/categories/categories';
+import { Users } from './pages/users/users';
 
 export const routes: Routes = [
   {
@@ -31,6 +32,10 @@ export const routes: Routes = [
   {
     path: 'categories',
     component: Categories,
+  },
+  {
+    path: 'users',
+    component: Users,
   },
   {
     path: '**',

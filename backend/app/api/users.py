@@ -1,12 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.api.dependencies import get_current_user
 from app.core.security import hash_password
 from app.database.connection import get_db
-from app.repositories.user_repository import create_user, get_user_by_email
-from app.schemas.user import UserCreate, UserResponse
-from app.api.dependencies import get_current_user
 from app.models.user import User
+from app.repositories.user_repository import (
+    create_user,
+    get_user_by_email,
+)
+from app.schemas.user import UserCreate, UserResponse
 
 
 router = APIRouter(
@@ -39,6 +42,28 @@ def register_user(
         user_data=user_data,
         password_hash=password_hash,
     )
+
+
+@router.get(
+    "",
+    response_model=list[UserResponse],
+)
+def get_users(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+) -> list[User]:
+    if current_user.role != "ADMIN":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Apenas administradores podem listar usuários.",
+        )
+
+    return (
+        db.query(User)
+        .order_by(User.id.asc())
+        .all()
+    )
+
 
 @router.get(
     "/me",
