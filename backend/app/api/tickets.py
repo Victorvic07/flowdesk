@@ -149,11 +149,14 @@ def assign_ticket_to_me(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ) -> TicketResponse:
-    if current_user.role != UserRole.TECHNICIAN:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Somente técnicos podem assumir chamados.",
-        )
+    if current_user.role not in {
+        UserRole.TECHNICIAN,
+         UserRole.ADMIN,
+     }:
+         raise HTTPException(
+        status_code=403,
+        detail="Apenas técnicos ou administradores podem assumir chamados.",
+    )
 
     ticket = get_ticket_by_id(
         db=db,

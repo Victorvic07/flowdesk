@@ -6,7 +6,7 @@
       </a>
 
       <h1>Detalhes do chamado</h1>
-      <p>Visualize todas as informações do atendimento.</p>
+      <p>Visualize e gerencie as informações do atendimento.</p>
     </div>
 
     <a routerLink="/dashboard" class="dashboard-link">
@@ -25,16 +25,76 @@
   } @else if (ticket) {
     <section class="ticket-header">
       <div>
-        <span class="ticket-id">Chamado #{{ ticket.id }}</span>
+        <span class="ticket-id">
+          Chamado #{{ ticket.id }}
+        </span>
+
         <h2>{{ ticket.title }}</h2>
         <p>{{ ticket.description }}</p>
       </div>
 
       <div class="badges">
-        <span class="status">{{ ticket.status }}</span>
-        <span class="priority">{{ ticket.priority }}</span>
+        <span class="status">
+          {{ ticket.status }}
+        </span>
+
+        <span class="priority">
+          {{ ticket.priority }}
+        </span>
       </div>
     </section>
+
+    <section class="ticket-actions">
+      <div class="status-control">
+        <label for="status">Alterar status</label>
+
+        <div>
+          <select
+            id="status"
+            [(ngModel)]="selectedStatus"
+          >
+            <option value="OPEN">Aberto</option>
+            <option value="IN_PROGRESS">Em atendimento</option>
+            <option value="WAITING_USER">
+              Aguardando usuário
+            </option>
+            <option value="RESOLVED">Resolvido</option>
+            <option value="CLOSED">Fechado</option>
+          </select>
+
+          <button
+            type="button"
+            (click)="changeStatus()"
+            [disabled]="savingStatus"
+          >
+            @if (savingStatus) {
+              Salvando...
+            } @else {
+              Atualizar status
+            }
+          </button>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        class="assign-button"
+        (click)="assignToMe()"
+        [disabled]="assigning"
+      >
+        @if (assigning) {
+          Atribuindo...
+        } @else {
+          Atribuir para mim
+        }
+      </button>
+    </section>
+
+    @if (actionMessage) {
+      <div class="action-message">
+        {{ actionMessage }}
+      </div>
+    }
 
     <section class="details-grid">
       <article>
@@ -68,6 +128,7 @@
 
       <article>
         <span>Criado em</span>
+
         <strong>
           {{ ticket.created_at | date: 'dd/MM/yyyy HH:mm' }}
         </strong>
@@ -75,15 +136,90 @@
 
       <article>
         <span>Última atualização</span>
+
         <strong>
           {{ ticket.updated_at | date: 'dd/MM/yyyy HH:mm' }}
         </strong>
       </article>
     </section>
 
-    <section class="activity">
-      <h2>Atividade do chamado</h2>
-      <p>Comentários e histórico serão exibidos aqui.</p>
+    <section class="activity-grid">
+      <article class="comments">
+        <h2>Comentários</h2>
+
+        <div class="comment-form">
+          <textarea
+            [(ngModel)]="newComment"
+            placeholder="Digite um comentário..."
+            rows="4"
+          ></textarea>
+
+          <button
+            type="button"
+            (click)="addComment()"
+            [disabled]="sendingComment || !newComment.trim()"
+          >
+            @if (sendingComment) {
+              Enviando...
+            } @else {
+              Adicionar comentário
+            }
+          </button>
+        </div>
+
+        <div class="comment-list">
+          @if (comments.length === 0) {
+            <p class="empty-text">
+              Nenhum comentário registrado.
+            </p>
+          } @else {
+            @for (comment of comments; track comment.id) {
+              <div class="comment-item">
+                <div class="comment-meta">
+                  <strong>Usuário #{{ comment.author_id }}</strong>
+
+                  <span>
+                    {{ comment.created_at | date: 'dd/MM/yyyy HH:mm' }}
+                  </span>
+                </div>
+
+                <p>{{ comment.content }}</p>
+              </div>
+            }
+          }
+        </div>
+      </article>
+
+      <article class="history">
+        <h2>Histórico</h2>
+
+        <div class="history-list">
+          @if (history.length === 0) {
+            <p class="empty-text">
+              Nenhuma alteração registrada.
+            </p>
+          } @else {
+            @for (item of history; track item.id) {
+              <div class="history-item">
+                <strong>{{ item.action }}</strong>
+
+                @if (item.old_value || item.new_value) {
+                  <p>
+                    {{ item.old_value || 'Sem valor' }}
+                    →
+                    {{ item.new_value || 'Sem valor' }}
+                  </p>
+                }
+
+                <span>
+                  Usuário #{{ item.user_id }} ·
+                  {{ item.created_at | date: 'dd/MM/yyyy HH:mm' }}
+                </span>
+              </div>
+            }
+          }
+        </div>
+      </article>
     </section>
   }
 </div>
