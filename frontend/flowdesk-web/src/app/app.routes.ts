@@ -1,10 +1,11 @@
 import { Routes } from '@angular/router';
 
-import { Dashboard } from './pages/dashboard/dashboard';
 import { Login } from './pages/login/login';
-import { NewTicket } from './pages/new-ticket/new-ticket';
+import { Dashboard } from './pages/dashboard/dashboard';
 import { Tickets } from './pages/tickets/tickets';
 import { TicketDetails } from './pages/ticket-details/ticket-details';
+import { NewTicket } from './pages/new-ticket/new-ticket';
+import { Categories } from './pages/categories/categories';
 
 export const routes: Routes = [
   {
@@ -19,15 +20,17 @@ export const routes: Routes = [
     path: 'tickets',
     component: Tickets,
   },
-
   {
     path: 'tickets/:id',
     component: TicketDetails,
   },
-
   {
     path: 'new-ticket',
     component: NewTicket,
+  },
+  {
+    path: 'categories',
+    component: Categories,
   },
   {
     path: '**',

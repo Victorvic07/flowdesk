@@ -1,0 +1,111 @@
+<div class="page">
+  <header>
+    <div>
+      <h1>Categorias</h1>
+      <p>Cadastre e consulte as categorias dos chamados.</p>
+    </div>
+
+    <div class="header-actions">
+      <a routerLink="/dashboard">Visão geral</a>
+      <a routerLink="/tickets">Chamados</a>
+    </div>
+  </header>
+
+  <section class="layout">
+    <article class="form-card">
+      <h2>Nova categoria</h2>
+      <p>Cadastre uma categoria para organizar os chamados.</p>
+
+      <form (ngSubmit)="createCategory()">
+        <div class="field">
+          <label for="name">Nome</label>
+
+          <input
+            id="name"
+            name="name"
+            type="text"
+            [(ngModel)]="name"
+            placeholder="Ex.: Infraestrutura"
+            maxlength="100"
+          />
+        </div>
+
+        <div class="field">
+          <label for="description">Descrição</label>
+
+          <textarea
+            id="description"
+            name="description"
+            [(ngModel)]="description"
+            placeholder="Descreva quais chamados pertencem a esta categoria."
+            rows="5"
+          ></textarea>
+        </div>
+
+        @if (errorMessage) {
+          <div class="message error">
+            {{ errorMessage }}
+          </div>
+        }
+
+        @if (successMessage) {
+          <div class="message success">
+            {{ successMessage }}
+          </div>
+        }
+
+      <button
+  type="submit"
+  [disabled]="saving || !name.trim() || !description.trim()"
+>
+  @if (saving) {
+    Cadastrando...
+  } @else {
+    Cadastrar categoria
+  }
+</button>
+      </form>
+    </article>
+
+    <article class="list-card">
+      <div class="section-title">
+        <div>
+          <h2>Categorias cadastradas</h2>
+          <p>{{ categories.length }} categoria(s) encontrada(s).</p>
+        </div>
+      </div>
+
+      @if (loading) {
+        <div class="state">
+          Carregando categorias...
+        </div>
+      } @else if (categories.length === 0) {
+        <div class="state">
+          Nenhuma categoria cadastrada.
+        </div>
+      } @else {
+        <div class="category-list">
+          @for (category of categories; track category.id) {
+            <div class="category-item">
+              <div>
+                <span class="category-id">
+                  #{{ category.id }}
+                </span>
+
+                <h3>{{ category.name }}</h3>
+                <p>{{ category.description }}</p>
+              </div>
+
+              <span
+                class="status"
+                [class.inactive]="!category.is_active"
+              >
+                {{ category.is_active ? 'Ativa' : 'Inativa' }}
+              </span>
+            </div>
+          }
+        </div>
+      }
+    </article>
+  </section>
+</div>
