@@ -209,3 +209,40 @@ header {
     gap: 18px;
   }
 }
+
+.ticket-list {
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ticket-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+
+  strong,
+  span {
+    display: block;
+  }
+
+  span {
+    margin-top: 5px;
+    color: #64748b;
+    font-size: 14px;
+  }
+}
+
+.ticket-meta {
+  min-width: 130px;
+  text-align: right;
+}
+
+.error strong {
+  color: #dc2626;
+}

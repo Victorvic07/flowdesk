@@ -10,11 +10,25 @@
     </div>
 
     <nav>
-      <a class="active">Visão geral</a>
-      <a>Chamados</a>
-      <a>Novo chamado</a>
-      <a>Categorias</a>
-      <a>Usuários</a>
+      <a routerLink="/dashboard" class="active">
+        Visão geral
+      </a>
+
+      <a>
+        Chamados
+      </a>
+
+      <a routerLink="/new-ticket">
+        Novo chamado
+      </a>
+
+      <a>
+        Categorias
+      </a>
+
+      <a>
+        Usuários
+      </a>
     </nav>
   </aside>
 
@@ -25,28 +39,33 @@
         <p>Acompanhe os chamados e indicadores do sistema.</p>
       </div>
 
-      <button type="button">Novo chamado</button>
+      <button
+        type="button"
+        routerLink="/new-ticket"
+      >
+        Novo chamado
+      </button>
     </header>
 
     <section class="cards">
       <article>
         <span>Chamados abertos</span>
-        <strong>0</strong>
+        <strong>{{ openCount }}</strong>
       </article>
 
       <article>
         <span>Em atendimento</span>
-        <strong>0</strong>
+        <strong>{{ inProgressCount }}</strong>
       </article>
 
       <article>
         <span>Aguardando usuário</span>
-        <strong>0</strong>
+        <strong>{{ waitingUserCount }}</strong>
       </article>
 
       <article>
         <span>Resolvidos</span>
-        <strong>0</strong>
+        <strong>{{ resolvedCount }}</strong>
       </article>
     </section>
 
@@ -58,10 +77,41 @@
         </div>
       </div>
 
-      <div class="empty-state">
-        <strong>Nenhum chamado carregado</strong>
-        <p>Em seguida, conectaremos esta tela à API.</p>
-      </div>
+      @if (loading) {
+        <div class="empty-state">
+          <strong>Carregando chamados...</strong>
+        </div>
+      } @else if (errorMessage) {
+        <div class="empty-state error">
+          <strong>{{ errorMessage }}</strong>
+        </div>
+      } @else if (tickets.length === 0) {
+        <div class="empty-state">
+          <strong>Nenhum chamado encontrado</strong>
+          <p>Os chamados aparecerão aqui quando forem cadastrados.</p>
+        </div>
+      } @else {
+        <div class="ticket-list">
+          @for (ticket of tickets.slice(0, 5); track ticket.id) {
+            <article class="ticket-item">
+              <div>
+                <strong>
+                  #{{ ticket.id }} — {{ ticket.title }}
+                </strong>
+
+                <span>
+                  {{ ticket.description }}
+                </span>
+              </div>
+
+              <div class="ticket-meta">
+                <span>{{ ticket.status }}</span>
+                <span>{{ ticket.priority }}</span>
+              </div>
+            </article>
+          }
+        </div>
+      }
     </section>
   </main>
 </div>

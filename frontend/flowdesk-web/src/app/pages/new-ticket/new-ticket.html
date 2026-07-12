@@ -1,0 +1,72 @@
+<div class="page">
+  <section class="card">
+    <div class="header">
+      <div>
+        <h1>Novo chamado</h1>
+        <p>Descreva o problema para iniciar um atendimento.</p>
+      </div>
+
+      <a routerLink="/dashboard">Voltar</a>
+    </div>
+
+    <form (ngSubmit)="createTicket()">
+      <label for="title">Título</label>
+      <input
+        id="title"
+        name="title"
+        type="text"
+        [(ngModel)]="title"
+        placeholder="Ex.: Computador sem internet"
+        required
+      />
+
+      <label for="category">Categoria</label>
+      <select
+        id="category"
+        name="category"
+        [(ngModel)]="categoryId"
+        required
+      >
+        <option [ngValue]="null">
+          {{ loadingCategories ? 'Carregando...' : 'Selecione uma categoria' }}
+        </option>
+
+        @for (category of categories; track category.id) {
+          <option [ngValue]="category.id">
+            {{ category.name }}
+          </option>
+        }
+      </select>
+
+      <label for="priority">Prioridade</label>
+      <select
+        id="priority"
+        name="priority"
+        [(ngModel)]="priority"
+      >
+        <option value="LOW">Baixa</option>
+        <option value="MEDIUM">Média</option>
+        <option value="HIGH">Alta</option>
+        <option value="CRITICAL">Crítica</option>
+      </select>
+
+      <label for="description">Descrição</label>
+      <textarea
+        id="description"
+        name="description"
+        [(ngModel)]="description"
+        rows="6"
+        placeholder="Explique o problema com detalhes."
+        required
+      ></textarea>
+
+      @if (errorMessage) {
+        <p class="error">{{ errorMessage }}</p>
+      }
+
+      <button type="submit" [disabled]="loading">
+        {{ loading ? 'Criando...' : 'Criar chamado' }}
+      </button>
+    </form>
+  </section>
+</div>
