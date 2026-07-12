@@ -1,0 +1,61 @@
+<div class="app-layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-icon">F</div>
+
+      <div>
+        <strong>FlowDesk</strong>
+        <span>Central de atendimento</span>
+      </div>
+    </div>
+
+    <nav>
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="active"
+      >
+        Visão geral
+      </a>
+
+      <a
+        routerLink="/tickets"
+        routerLinkActive="active"
+      >
+        Chamados
+      </a>
+
+      <a
+        routerLink="/new-ticket"
+        routerLinkActive="active"
+      >
+        Novo chamado
+      </a>
+
+      <a
+        routerLink="/categories"
+        routerLinkActive="active"
+      >
+        Categorias
+      </a>
+
+      <a
+        routerLink="/users"
+        routerLinkActive="active"
+      >
+        Usuários
+      </a>
+    </nav>
+
+    <button
+      type="button"
+      class="logout-button"
+      (click)="logout()"
+    >
+      Sair
+    </button>
+  </aside>
+
+  <main class="layout-content">
+    <router-outlet />
+  </main>
+</div>

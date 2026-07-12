@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 
 import { authGuard } from './guards/auth-guard';
+import { AppLayout } from './layout/app-layout/app-layout';
 import { Categories } from './pages/categories/categories';
 import { Dashboard } from './pages/dashboard/dashboard';
 import { Login } from './pages/login/login';
@@ -15,34 +16,35 @@ export const routes: Routes = [
     component: Login,
   },
   {
-    path: 'dashboard',
-    component: Dashboard,
+    path: '',
+    component: AppLayout,
     canActivate: [authGuard],
-  },
-  {
-    path: 'tickets',
-    component: Tickets,
-    canActivate: [authGuard],
-  },
-  {
-    path: 'tickets/:id',
-    component: TicketDetails,
-    canActivate: [authGuard],
-  },
-  {
-    path: 'new-ticket',
-    component: NewTicket,
-    canActivate: [authGuard],
-  },
-  {
-    path: 'categories',
-    component: Categories,
-    canActivate: [authGuard],
-  },
-  {
-    path: 'users',
-    component: Users,
-    canActivate: [authGuard],
+    children: [
+      {
+        path: 'dashboard',
+        component: Dashboard,
+      },
+      {
+        path: 'tickets',
+        component: Tickets,
+      },
+      {
+        path: 'tickets/:id',
+        component: TicketDetails,
+      },
+      {
+        path: 'new-ticket',
+        component: NewTicket,
+      },
+      {
+        path: 'categories',
+        component: Categories,
+      },
+      {
+        path: 'users',
+        component: Users,
+      },
+    ],
   },
   {
     path: '**',

@@ -1,124 +1,85 @@
-<div class="dashboard">
-  <aside class="sidebar">
-    <div class="brand">
-      <div class="brand-icon">F</div>
+<div class="dashboard-content">
+  <header>
+    <div>
+      <h1>Visão geral</h1>
+      <p>Acompanhe os chamados e indicadores do sistema.</p>
+    </div>
 
+    <button
+      type="button"
+      routerLink="/new-ticket"
+    >
+      Novo chamado
+    </button>
+  </header>
+
+  <section class="cards">
+    <article>
+      <span>Chamados abertos</span>
+      <strong>{{ openCount }}</strong>
+    </article>
+
+    <article>
+      <span>Em atendimento</span>
+      <strong>{{ inProgressCount }}</strong>
+    </article>
+
+    <article>
+      <span>Aguardando usuário</span>
+      <strong>{{ waitingUserCount }}</strong>
+    </article>
+
+    <article>
+      <span>Resolvidos</span>
+      <strong>{{ resolvedCount }}</strong>
+    </article>
+  </section>
+
+  <section class="tickets">
+    <div class="section-title">
       <div>
-        <strong>FlowDesk</strong>
-        <span>Central de atendimento</span>
+        <h2>Chamados recentes</h2>
+        <p>Últimos chamados registrados no sistema.</p>
       </div>
     </div>
 
-    <nav>
-      <a routerLink="/dashboard" class="active">
-        Visão geral
-      </a>
-
-      <a>
-        <a routerLink="/tickets">Chamados</a>
-      </a>
-
-      <a routerLink="/new-ticket">
-        Novo chamado
-      </a>
-
-      <a>
-        <a routerLink="/categories">Categorias</a>
-      </a>
-
-      <a>
-        <a routerLink="/users">Usuários</a>
-        <button
-  type="button"
-  class="logout-button"
-  (click)="logout()"
->
-  Sair
-</button>
-      </a>
-    </nav>
-  </aside>
-
-  <main class="content">
-    <header>
-      <div>
-        <h1>Visão geral</h1>
-        <p>Acompanhe os chamados e indicadores do sistema.</p>
+    @if (loading) {
+      <div class="empty-state">
+        <strong>Carregando chamados...</strong>
       </div>
-
-      <button
-        type="button"
-        routerLink="/new-ticket"
-      >
-        Novo chamado
-      </button>
-    </header>
-
-    <section class="cards">
-      <article>
-        <span>Chamados abertos</span>
-        <strong>{{ openCount }}</strong>
-      </article>
-
-      <article>
-        <span>Em atendimento</span>
-        <strong>{{ inProgressCount }}</strong>
-      </article>
-
-      <article>
-        <span>Aguardando usuário</span>
-        <strong>{{ waitingUserCount }}</strong>
-      </article>
-
-      <article>
-        <span>Resolvidos</span>
-        <strong>{{ resolvedCount }}</strong>
-      </article>
-    </section>
-
-    <section class="tickets">
-      <div class="section-title">
-        <div>
-          <h2>Chamados recentes</h2>
-          <p>Últimos chamados registrados no sistema.</p>
-        </div>
+    } @else if (errorMessage) {
+      <div class="empty-state error">
+        <strong>{{ errorMessage }}</strong>
       </div>
+    } @else if (tickets.length === 0) {
+      <div class="empty-state">
+        <strong>Nenhum chamado encontrado</strong>
+        <p>Os chamados aparecerão aqui quando forem cadastrados.</p>
+      </div>
+    } @else {
+      <div class="ticket-list">
+        @for (ticket of tickets.slice(0, 5); track ticket.id) {
+          <article
+            class="ticket-item"
+            [routerLink]="['/tickets', ticket.id]"
+          >
+            <div>
+              <strong>
+                #{{ ticket.id }} — {{ ticket.title }}
+              </strong>
 
-      @if (loading) {
-        <div class="empty-state">
-          <strong>Carregando chamados...</strong>
-        </div>
-      } @else if (errorMessage) {
-        <div class="empty-state error">
-          <strong>{{ errorMessage }}</strong>
-        </div>
-      } @else if (tickets.length === 0) {
-        <div class="empty-state">
-          <strong>Nenhum chamado encontrado</strong>
-          <p>Os chamados aparecerão aqui quando forem cadastrados.</p>
-        </div>
-      } @else {
-        <div class="ticket-list">
-          @for (ticket of tickets.slice(0, 5); track ticket.id) {
-            <article class="ticket-item">
-              <div>
-                <strong>
-                  #{{ ticket.id }} — {{ ticket.title }}
-                </strong>
+              <span>
+                {{ ticket.description }}
+              </span>
+            </div>
 
-                <span>
-                  {{ ticket.description }}
-                </span>
-              </div>
-
-              <div class="ticket-meta">
-                <span>{{ ticket.status }}</span>
-                <span>{{ ticket.priority }}</span>
-              </div>
-            </article>
-          }
-        </div>
-      }
-    </section>
-  </main>
+            <div class="ticket-meta">
+              <span>{{ ticket.status }}</span>
+              <span>{{ ticket.priority }}</span>
+            </div>
+          </article>
+        }
+      </div>
+    }
+  </section>
 </div>
