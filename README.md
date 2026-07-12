@@ -267,22 +267,6 @@ O projeto implementa:
 - tratamento de `401 Unauthorized`;
 - proteção contra desativação da própria conta administrativa.
 
-## Screenshots
-
-Adicione imagens na pasta:
-
-```text
-docs/screenshots/
-```
-
-Exemplo de uso no README:
-
-```markdown
-![Dashboard](docs/screenshots/dashboard.png)
-![Chamados](docs/screenshots/tickets.png)
-![Detalhes](docs/screenshots/ticket-details.png)
-```
-
 ## Melhorias futuras
 
 - refresh token;
