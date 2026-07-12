@@ -284,3 +284,48 @@ form button {
     background: #fef2f2;
   }
 }
+
+.user-actions {
+  display: flex;
+  align-items: flex-end;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.status-button {
+  min-width: 100px;
+  padding: 8px 12px;
+  border: 1px solid #fecaca;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #dc2626;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+
+  &:hover:not(:disabled) {
+    border-color: #fca5a5;
+    background: #fef2f2;
+  }
+
+  &.activate {
+    border-color: #bbf7d0;
+    color: #15803d;
+
+    &:hover:not(:disabled) {
+      border-color: #86efac;
+      background: #f0fdf4;
+    }
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+@media (max-width: 700px) {
+  .user-actions {
+    align-items: flex-start;
+  }
+}

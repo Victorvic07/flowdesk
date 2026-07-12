@@ -4,11 +4,6 @@
       <h1>Categorias</h1>
       <p>Cadastre e consulte as categorias dos chamados.</p>
     </div>
-
-    <div class="header-actions">
-      <a routerLink="/dashboard">Visão geral</a>
-      <a routerLink="/tickets">Chamados</a>
-    </div>
   </header>
 
   <section class="layout">
@@ -54,16 +49,16 @@
           </div>
         }
 
-      <button
-            type="submit"
-            [disabled]="saving || !name.trim() || !description.trim()"
-            >
-            @if (saving) {
-                Cadastrando...
-            } @else {
-                Cadastrar categoria
-            }
-            </button>
+        <button
+          type="submit"
+          [disabled]="saving || !name.trim() || !description.trim()"
+        >
+          @if (saving) {
+            Cadastrando...
+          } @else {
+            Cadastrar categoria
+          }
+        </button>
       </form>
     </article>
 
@@ -87,7 +82,7 @@
         <div class="category-list">
           @for (category of categories; track category.id) {
             <div class="category-item">
-              <div>
+              <div class="category-content">
                 <span class="category-id">
                   #{{ category.id }}
                 </span>
@@ -96,12 +91,27 @@
                 <p>{{ category.description }}</p>
               </div>
 
-              <span
-                class="status"
-                [class.inactive]="!category.is_active"
-              >
-                {{ category.is_active ? 'Ativa' : 'Inativa' }}
-              </span>
+              <div class="category-actions">
+                <span
+                  class="status"
+                  [class.inactive]="!category.is_active"
+                >
+                  {{ category.is_active ? 'Ativa' : 'Inativa' }}
+                </span>
+
+                <button
+                  type="button"
+                  class="delete-button"
+                  (click)="deleteCategory(category)"
+                  [disabled]="deletingCategoryId === category.id"
+                >
+                  @if (deletingCategoryId === category.id) {
+                    Excluindo...
+                  } @else {
+                    Excluir
+                  }
+                </button>
+              </div>
             </div>
           }
         </div>

@@ -29,6 +29,7 @@ export class Categories implements OnInit {
 
   loading = true;
   saving = false;
+  deletingCategoryId: number | null = null;
 
   errorMessage = '';
   successMessage = '';
@@ -51,6 +52,7 @@ export class Categories implements OnInit {
     if (!name || !description) {
       this.errorMessage = 'Preencha o nome e a descrição.';
       this.successMessage = '';
+      this.changeDetector.detectChanges();
       return;
     }
 
@@ -85,57 +87,126 @@ export class Categories implements OnInit {
 
           this.successMessage = 'Categoria cadastrada com sucesso.';
           this.errorMessage = '';
-          this.saving = false;
 
           this.changeDetector.detectChanges();
         },
-          error: (error) => {
-            console.error('Erro ao cadastrar categoria:', error);
+        error: (error) => {
+          console.error('Erro ao cadastrar categoria:', error);
 
-            if (error.status === 403) {
-              this.errorMessage =
-                'Você não tem permissão para cadastrar categorias.';
-            } else if (error.status === 409) {
-              this.errorMessage =
-                'Já existe uma categoria com esse nome.';
-            } else {
-              this.errorMessage =
-                'Não foi possível cadastrar a categoria.';
-            }
+          if (error.status === 401) {
+            this.errorMessage =
+              'Sua sessão expirou. Faça login novamente.';
+          } else if (error.status === 403) {
+            this.errorMessage =
+              'Você não tem permissão para cadastrar categorias.';
+          } else if (error.status === 409) {
+            this.errorMessage =
+              'Já existe uma categoria com esse nome.';
+          } else {
+            this.errorMessage =
+              'Não foi possível cadastrar a categoria.';
+          }
 
-            this.saving = false;
-            this.changeDetector.detectChanges();
-          },
+          this.changeDetector.detectChanges();
+        },
+      });
+  }
+
+  deleteCategory(category: Category): void {
+    const confirmed = window.confirm(
+      `Deseja realmente excluir a categoria "${category.name}"?`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.deletingCategoryId = category.id;
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.changeDetector.detectChanges();
+
+    this.http
+      .delete<void>(
+        `${this.apiUrl}/categories/${category.id}`,
+        {
+          headers: this.getHeaders(),
+        },
+      )
+      .pipe(
+        take(1),
+        finalize(() => {
+          this.deletingCategoryId = null;
+          this.changeDetector.detectChanges();
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.categories = this.categories.filter(
+            (item) => item.id !== category.id,
+          );
+
+          this.successMessage = 'Categoria excluída com sucesso.';
+          this.errorMessage = '';
+
+          this.changeDetector.detectChanges();
+        },
+        error: (error) => {
+          console.error('Erro ao excluir categoria:', error);
+
+          if (error.status === 401) {
+            this.errorMessage =
+              'Sua sessão expirou. Faça login novamente.';
+          } else if (error.status === 403) {
+            this.errorMessage =
+              'Você não tem permissão para excluir categorias.';
+          } else if (error.status === 404) {
+            this.errorMessage = 'Categoria não encontrada.';
+          } else if (error.status === 409) {
+            this.errorMessage =
+              'Esta categoria possui chamados vinculados e não pode ser excluída.';
+          } else {
+            this.errorMessage =
+              'Não foi possível excluir a categoria.';
+          }
+
+          this.changeDetector.detectChanges();
+        },
       });
   }
 
   private loadCategories(): void {
-  this.loading = true;
-  this.errorMessage = '';
+    this.loading = true;
+    this.errorMessage = '';
 
-  this.http
-    .get<Category[]>(`${this.apiUrl}/categories`, {
-      headers: this.getHeaders(),
-    })
-    .pipe(take(1))
-    .subscribe({
-      next: (categories) => {
-        this.categories = [...categories];
-        this.loading = false;
+    this.http
+      .get<Category[]>(`${this.apiUrl}/categories`, {
+        headers: this.getHeaders(),
+      })
+      .pipe(take(1))
+      .subscribe({
+        next: (categories) => {
+          this.categories = [...categories];
+          this.loading = false;
 
-        this.changeDetector.detectChanges();
-      },
-      error: (error) => {
-        console.error('Erro ao carregar categorias:', error);
+          this.changeDetector.detectChanges();
+        },
+        error: (error) => {
+          console.error('Erro ao carregar categorias:', error);
 
-        this.errorMessage =
-          'Não foi possível carregar as categorias.';
-        this.loading = false;
+          if (error.status === 401) {
+            this.errorMessage =
+              'Sua sessão expirou. Faça login novamente.';
+          } else {
+            this.errorMessage =
+              'Não foi possível carregar as categorias.';
+          }
 
-        this.changeDetector.detectChanges();
-      },
-    });
-}
+          this.loading = false;
+          this.changeDetector.detectChanges();
+        },
+      });
+  }
 
   private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('flowdesk_token');

@@ -34,26 +34,26 @@ export class Users implements OnInit {
 
   loading = true;
   saving = false;
+  updatingUserId: number | null = null;
 
   errorMessage = '';
   successMessage = '';
 
   private readonly apiUrl = 'http://127.0.0.1:8000';
 
-logout(): void {
-  localStorage.removeItem('flowdesk_token');
-  this.router.navigate(['/']);
-}
-
-
   constructor(
-  private readonly http: HttpClient,
-  private readonly changeDetector: ChangeDetectorRef,
-  private readonly router: Router,
-) {}
+    private readonly http: HttpClient,
+    private readonly changeDetector: ChangeDetectorRef,
+    private readonly router: Router,
+  ) {}
 
   ngOnInit(): void {
     this.loadUsers();
+  }
+
+  logout(): void {
+    localStorage.removeItem('flowdesk_token');
+    this.router.navigate(['/']);
   }
 
   createUser(): void {
@@ -64,6 +64,7 @@ logout(): void {
     ) {
       this.errorMessage = 'Preencha todos os campos.';
       this.successMessage = '';
+      this.changeDetector.detectChanges();
       return;
     }
 
@@ -95,6 +96,7 @@ logout(): void {
           this.role = 'REQUESTER';
 
           this.successMessage = 'Usuário cadastrado com sucesso.';
+          this.errorMessage = '';
           this.saving = false;
 
           this.changeDetector.detectChanges();
@@ -102,7 +104,10 @@ logout(): void {
         error: (error) => {
           console.error('Erro ao cadastrar usuário:', error);
 
-          if (error.status === 409) {
+          if (error.status === 401) {
+            this.errorMessage =
+              'Sua sessão expirou. Faça login novamente.';
+          } else if (error.status === 409) {
             this.errorMessage =
               'Já existe um usuário com esse e-mail.';
           } else if (error.status === 403) {
@@ -113,7 +118,80 @@ logout(): void {
               'Não foi possível cadastrar o usuário.';
           }
 
+          this.successMessage = '';
           this.saving = false;
+          this.changeDetector.detectChanges();
+        },
+      });
+  }
+
+  toggleUserStatus(user: User): void {
+    const action = user.is_active ? 'desativar' : 'ativar';
+
+    const confirmed = window.confirm(
+      `Deseja realmente ${action} o usuário "${user.name}"?`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    this.updatingUserId = user.id;
+    this.errorMessage = '';
+    this.successMessage = '';
+    this.changeDetector.detectChanges();
+
+    this.http
+      .patch<User>(
+        `${this.apiUrl}/users/${user.id}/status`,
+        {
+          is_active: !user.is_active,
+        },
+        {
+          headers: this.getHeaders(),
+        },
+      )
+      .pipe(take(1))
+      .subscribe({
+        next: (updatedUser) => {
+          this.users = this.users.map((item) =>
+            item.id === updatedUser.id ? updatedUser : item,
+          );
+
+          this.successMessage = updatedUser.is_active
+            ? 'Usuário ativado com sucesso.'
+            : 'Usuário desativado com sucesso.';
+
+          this.errorMessage = '';
+          this.updatingUserId = null;
+
+          this.changeDetector.detectChanges();
+        },
+        error: (error) => {
+          console.error(
+            'Erro ao alterar status do usuário:',
+            error,
+          );
+
+          if (error.status === 401) {
+            this.errorMessage =
+              'Sua sessão expirou. Faça login novamente.';
+          } else if (error.status === 409) {
+            this.errorMessage =
+              'Você não pode desativar a própria conta.';
+          } else if (error.status === 403) {
+            this.errorMessage =
+              'Você não tem permissão para alterar usuários.';
+          } else if (error.status === 404) {
+            this.errorMessage = 'Usuário não encontrado.';
+          } else {
+            this.errorMessage =
+              'Não foi possível alterar o status do usuário.';
+          }
+
+          this.successMessage = '';
+          this.updatingUserId = null;
+
           this.changeDetector.detectChanges();
         },
       });
@@ -138,7 +216,10 @@ logout(): void {
         error: (error) => {
           console.error('Erro ao carregar usuários:', error);
 
-          if (error.status === 403) {
+          if (error.status === 401) {
+            this.errorMessage =
+              'Sua sessão expirou. Faça login novamente.';
+          } else if (error.status === 403) {
             this.errorMessage =
               'Apenas administradores podem visualizar usuários.';
           } else {
