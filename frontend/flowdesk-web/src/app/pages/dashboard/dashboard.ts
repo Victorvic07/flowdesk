@@ -1,6 +1,7 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
+
 
 interface Ticket {
   id: number;
@@ -26,7 +27,10 @@ export class Dashboard implements OnInit {
   loading = true;
   errorMessage = '';
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+  private readonly http: HttpClient,
+  private readonly changeDetector: ChangeDetectorRef,
+) {}
 
   ngOnInit(): void {
     this.loadTickets();
@@ -70,15 +74,17 @@ export class Dashboard implements OnInit {
     this.http
       .get<Ticket[]>('http://127.0.0.1:8000/tickets', { headers })
       .subscribe({
-        next: (tickets) => {
-          this.tickets = tickets;
-          this.loading = false;
-        },
-        error: (error) => {
-          console.error(error);
-          this.errorMessage = 'Não foi possível carregar os chamados.';
-          this.loading = false;
-        },
+       next: (tickets) => {
+  this.tickets = tickets;
+  this.loading = false;
+  this.changeDetector.detectChanges();
+},
+error: (error) => {
+  console.error(error);
+  this.errorMessage = 'Não foi possível carregar os chamados.';
+  this.loading = false;
+  this.changeDetector.detectChanges();
+},
       });
   }
 }

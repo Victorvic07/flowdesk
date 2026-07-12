@@ -60,7 +60,10 @@
     } @else {
       <div class="ticket-list">
         @for (ticket of filteredTickets; track ticket.id) {
-          <article class="ticket-card">
+        <article
+            class="ticket-card"
+            [routerLink]="['/tickets', ticket.id]"
+        >
             <div class="ticket-main">
               <span class="ticket-id">#{{ ticket.id }}</span>
               <h2>{{ ticket.title }}</h2>

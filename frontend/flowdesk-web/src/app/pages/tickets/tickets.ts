@@ -1,5 +1,5 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { DatePipe } from '@angular/common';
@@ -34,7 +34,10 @@ export class Tickets implements OnInit {
   loading = true;
   errorMessage = '';
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+  private readonly http: HttpClient,
+  private readonly changeDetector: ChangeDetectorRef,
+) {}
 
   ngOnInit(): void {
     this.loadTickets();
@@ -75,14 +78,16 @@ export class Tickets implements OnInit {
       .get<Ticket[]>('http://127.0.0.1:8000/tickets', { headers })
       .subscribe({
         next: (tickets) => {
-          this.tickets = tickets;
-          this.filteredTickets = tickets;
-          this.loading = false;
-        },
-        error: () => {
-          this.errorMessage = 'Não foi possível carregar os chamados.';
-          this.loading = false;
-        },
+  this.tickets = tickets;
+  this.filteredTickets = [...tickets];
+  this.loading = false;
+  this.changeDetector.detectChanges();
+},
+error: () => {
+  this.errorMessage = 'Não foi possível carregar os chamados.';
+  this.loading = false;
+  this.changeDetector.detectChanges();
+},
       });
   }
 }

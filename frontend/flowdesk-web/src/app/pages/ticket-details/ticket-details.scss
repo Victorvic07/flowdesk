@@ -1,0 +1,188 @@
+:host {
+  display: block;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.page {
+  min-height: 100vh;
+  padding: 36px;
+  background: #f1f5f9;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+
+  h1,
+  p {
+    margin: 0;
+  }
+
+  h1 {
+    margin-top: 12px;
+    color: #0f172a;
+    font-size: 30px;
+  }
+
+  p {
+    margin-top: 7px;
+    color: #64748b;
+  }
+}
+
+.back-link,
+.dashboard-link {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.dashboard-link {
+  padding: 12px 16px;
+  border-radius: 9px;
+  background: #ffffff;
+}
+
+.ticket-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 28px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+
+  h2,
+  p {
+    margin: 0;
+  }
+
+  h2 {
+    margin-top: 7px;
+    color: #0f172a;
+    font-size: 24px;
+  }
+
+  p {
+    margin-top: 12px;
+    color: #64748b;
+    line-height: 1.6;
+  }
+}
+
+.ticket-id {
+  color: #2563eb;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.badges {
+  display: flex;
+  gap: 10px;
+
+  span {
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+}
+
+.status {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.priority {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 22px;
+
+  article {
+    padding: 20px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    background: #ffffff;
+  }
+
+  span,
+  strong {
+    display: block;
+  }
+
+  span {
+    color: #64748b;
+    font-size: 14px;
+  }
+
+  strong {
+    margin-top: 8px;
+    color: #0f172a;
+  }
+}
+
+.activity {
+  min-height: 220px;
+  margin-top: 22px;
+  padding: 24px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+
+  h2,
+  p {
+    margin: 0;
+  }
+
+  h2 {
+    color: #0f172a;
+  }
+
+  p {
+    margin-top: 8px;
+    color: #64748b;
+  }
+}
+
+.state {
+  min-height: 400px;
+  display: grid;
+  place-items: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #ffffff;
+  color: #64748b;
+}
+
+.error {
+  color: #dc2626;
+}
+
+@media (max-width: 800px) {
+  .page {
+    padding: 20px;
+  }
+
+  header,
+  .ticket-header {
+    flex-direction: column;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+  }
+}

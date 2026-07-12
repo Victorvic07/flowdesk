@@ -1,0 +1,89 @@
+<div class="page">
+  <header>
+    <div>
+      <a routerLink="/tickets" class="back-link">
+        ← Voltar para chamados
+      </a>
+
+      <h1>Detalhes do chamado</h1>
+      <p>Visualize todas as informações do atendimento.</p>
+    </div>
+
+    <a routerLink="/dashboard" class="dashboard-link">
+      Visão geral
+    </a>
+  </header>
+
+  @if (loading) {
+    <section class="state">
+      Carregando chamado...
+    </section>
+  } @else if (errorMessage) {
+    <section class="state error">
+      {{ errorMessage }}
+    </section>
+  } @else if (ticket) {
+    <section class="ticket-header">
+      <div>
+        <span class="ticket-id">Chamado #{{ ticket.id }}</span>
+        <h2>{{ ticket.title }}</h2>
+        <p>{{ ticket.description }}</p>
+      </div>
+
+      <div class="badges">
+        <span class="status">{{ ticket.status }}</span>
+        <span class="priority">{{ ticket.priority }}</span>
+      </div>
+    </section>
+
+    <section class="details-grid">
+      <article>
+        <span>Solicitante</span>
+        <strong>#{{ ticket.requester_id }}</strong>
+      </article>
+
+      <article>
+        <span>Técnico responsável</span>
+
+        <strong>
+          @if (ticket.technician_id) {
+            #{{ ticket.technician_id }}
+          } @else {
+            Não atribuído
+          }
+        </strong>
+      </article>
+
+      <article>
+        <span>Categoria</span>
+
+        <strong>
+          @if (ticket.category_id) {
+            #{{ ticket.category_id }}
+          } @else {
+            Sem categoria
+          }
+        </strong>
+      </article>
+
+      <article>
+        <span>Criado em</span>
+        <strong>
+          {{ ticket.created_at | date: 'dd/MM/yyyy HH:mm' }}
+        </strong>
+      </article>
+
+      <article>
+        <span>Última atualização</span>
+        <strong>
+          {{ ticket.updated_at | date: 'dd/MM/yyyy HH:mm' }}
+        </strong>
+      </article>
+    </section>
+
+    <section class="activity">
+      <h2>Atividade do chamado</h2>
+      <p>Comentários e histórico serão exibidos aqui.</p>
+    </section>
+  }
+</div>
