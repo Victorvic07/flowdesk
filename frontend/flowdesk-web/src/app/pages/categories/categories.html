@@ -55,15 +55,15 @@
         }
 
       <button
-  type="submit"
-  [disabled]="saving || !name.trim() || !description.trim()"
->
-  @if (saving) {
-    Cadastrando...
-  } @else {
-    Cadastrar categoria
-  }
-</button>
+            type="submit"
+            [disabled]="saving || !name.trim() || !description.trim()"
+            >
+            @if (saving) {
+                Cadastrando...
+            } @else {
+                Cadastrar categoria
+            }
+            </button>
       </form>
     </article>
 

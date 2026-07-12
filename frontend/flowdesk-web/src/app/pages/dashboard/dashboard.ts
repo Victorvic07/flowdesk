@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 
 interface Ticket {
@@ -26,10 +26,14 @@ export class Dashboard implements OnInit {
   tickets: Ticket[] = [];
   loading = true;
   errorMessage = '';
-
+logout(): void {
+  localStorage.removeItem('flowdesk_token');
+  this.router.navigate(['/']);
+}
   constructor(
   private readonly http: HttpClient,
   private readonly changeDetector: ChangeDetectorRef,
+  private readonly router: Router,
 ) {}
 
   ngOnInit(): void {

@@ -6,9 +6,17 @@
     </div>
 
     <div class="header-actions">
-      <a routerLink="/dashboard">Visão geral</a>
-      <a routerLink="/tickets">Chamados</a>
-    </div>
+  <a routerLink="/dashboard">Visão geral</a>
+  <a routerLink="/tickets">Chamados</a>
+
+  <button
+    type="button"
+    class="logout-button"
+    (click)="logout()"
+  >
+    Sair
+  </button>
+</div>
   </header>
 
   <section class="layout">

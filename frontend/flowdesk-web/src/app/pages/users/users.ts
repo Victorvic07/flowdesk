@@ -6,7 +6,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { take } from 'rxjs';
 
 interface User {
@@ -40,10 +40,17 @@ export class Users implements OnInit {
 
   private readonly apiUrl = 'http://127.0.0.1:8000';
 
+logout(): void {
+  localStorage.removeItem('flowdesk_token');
+  this.router.navigate(['/']);
+}
+
+
   constructor(
-    private readonly http: HttpClient,
-    private readonly changeDetector: ChangeDetectorRef,
-  ) {}
+  private readonly http: HttpClient,
+  private readonly changeDetector: ChangeDetectorRef,
+  private readonly router: Router,
+) {}
 
   ngOnInit(): void {
     this.loadUsers();
